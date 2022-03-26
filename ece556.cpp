@@ -46,7 +46,7 @@ int readBenchmark(const char *fileName, routingInst *rst){
   getline(myfile, line); // read line
   stringstream linestream(line);
   string item;
-  getline(linestream, item, ' '); // token 0
+  getline(linestream, item, ' '); // token 0 (garbage)
 
   getline(linestream, item, ' '); // token 1
   rst->gx = stoi(item);
