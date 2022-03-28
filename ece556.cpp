@@ -35,20 +35,24 @@ int writeOutput(const char *outRouteFile, routingInst *rst)
   fileOut.open(outRouteFile);
 
 
-  // write net segments to fileOut
-  for (int i=0; i< (*rst).numNets; ++i) // enumerate through nets
+ // write net segments to fileOut
+  for (int i=0; i< (*rst).numNets; ++i) // enumerates through nets
   {
-    char *string = new char[10000];
+    char *string = (char *)malloc(1000 * sizeof(char));
+    if (!name) {
+      fputs ("ERR: memory allocation for string failed", stderr);
+      exit (EXIT_FAILURE);
+    }
     sprintf(string, "n" , i, "\n");
-    for (int j=0; j < (*rst).nets[i].nroute.numSegs; ++j) // 
+    for (int j=0; j < (*rst).nets[i].nroute.numSegs; ++j) // enumerates through endpoints of routes
     {
       sprintf(string, "(", (*rst).nets[i].nroute.segments[j].p1.x, ",", (*rst).nets[i].nroute.segments[j].p1.y, ")-");
       sprintf(string, "(", (*rst).nets[i].nroute.segments[j].p2.x, ",", (*rst).nets[i].nroute.segments[j].p2.y, ")\n");
     }
     sprintf(string,"!\n");
     fileOut << string;
+    free(string);
   }
-  //sprintf(string, "\0"); <- not sure if this is necessary
 
   
   //close the output file
