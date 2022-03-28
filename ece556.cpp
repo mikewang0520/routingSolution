@@ -60,6 +60,25 @@ int writeOutput(const char *outRouteFile, routingInst *rst)
 int release(routingInst *rst)
 {
   /*********** TO BE FILLED BY YOU **********/
+  // release segments
+  free(rst.nets.nroute.segments);
+  // release routes
+  free(rst.nets.nroute);
+  // release fields in the net structure
+  free(rst.nets.id);
+  free(rst.nets.numPins);
+  free(rst.nets.pins);
+  // release nets
+  free(rst.nets);
+  // release fields in the routing instance
+  free(rst.gx);
+  free(rst.gy);
+  free(rst.cap);
+  free(rst.numNets);
+  free(rst.numEdges);
+  free(rst.edgeCaps);
+  free(rst.edgeUtils);
+  // release routing instance itself
   free(rst);
   return 1;
 }
