@@ -8,23 +8,6 @@
 
 using namespace std;
 
-// Reference for routingInst struct
-//  typedef struct
-  //  {
-    //   int gx ;             /* x dimension of the global routing grid */
-    //   int gy ;             /* y dimension of the global routing grid */
-
-    //   int cap ;
-
-    //   int numNets ;        /* number of nets */
-    //   net *nets ;          /* array of nets */
-
-    //   int numEdges ;       /* number of edges of the grid */
-    //   int *edgeCaps;       /* array of the actual edge capacities after considering for blockages */
-    //   int *edgeUtils;      /* array of edge utilizations */
-
-    //  } routingInst ;
-
 int readBenchmark(const char *fileName, routingInst *rst){
   /*********** TO BE FILLED BY YOU **********/
   /*
