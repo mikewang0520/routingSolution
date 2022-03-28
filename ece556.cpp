@@ -29,13 +29,28 @@ int solveRouting(routingInst *rst)
 // Write the routing solution
 int writeOutput(const char *outRouteFile, routingInst *rst)
 {
-  /*********** TO BE FILLED BY YOU **********/
   //declare file stream variable
   ofstream fileOut;
   //open the output file
   fileOut.open(outRouteFile);
-  //wirte to the output file
-  fileOut << "";
+
+
+  // write net segments to fileOut
+  for (int i=0; i< (*rst).numNets; ++i) // enumerate through nets
+  {
+    char *string = new char[10000];
+    sprintf(string, "n" , i, "\n");
+    for (int j=0; j < (*rst).nets[i].nroute.numSegs; ++j) // 
+    {
+      sprintf(string, "(", (*rst).nets[i].nroute.segments[j].p1.x, ",", (*rst).nets[i].nroute.segments[j].p1.y, ")-");
+      sprintf(string, "(", (*rst).nets[i].nroute.segments[j].p2.x, ",", (*rst).nets[i].nroute.segments[j].p2.y, ")\n");
+    }
+    sprintf(string,"!\n");
+    fileOut << string;
+  }
+  //sprintf(string, "\0"); <- not sure if this is necessary
+
+  
   //close the output file
   fileOut.close();
   return 1;
