@@ -35,6 +35,35 @@ int getEdgeID(routingInst *rst, point p1, point p2) {
   return -1;
 }
 
+void unpackEdgeID(routingInst *rst, int edgeID, point *p1, point *p2) {
+  //int x1 = p1.x;
+  //int y1 = p1.y;
+  //int x2 = p2.x;
+  //int y2 = p2.y;
+  int gx = rst->gx;
+  int gy = rst->gy;
+  int bias = ((gx-1)*gy);
+  
+  // if edgeID vertical
+  if (edgeID >= (gx-1)*gy) {
+    p2->y = (edgeID-bias)/gx + 1;
+    p1->y = p2->y - 1;
+
+    p2->x = (edgeID-bias)%gx;
+    p1->x = p2->x;
+  }
+  // else edgeID horizontal
+  else {
+    p2->x = edgeID%(gx-1) + 1;
+    p1->x = p2->x - 1;
+
+    p2->y = edgeID/(gx-1);
+    p1->y = p2->y;
+  }
+
+  return;
+}
+
 int readBenchmark(const char *fileName, routingInst *rst){
   /*********** TO BE FILLED BY YOU **********/
 
@@ -163,7 +192,8 @@ int solveRouting(routingInst *rst)
 	nextPoint.y = pin1.y;
 
 	int edgeID = -1;
-	
+
+	// calculate edgeID
 	if (pin2.x > pin1.x) {
 	  currPoint.x = pin1.x + k;
 	  nextPoint.x = pin1.x + k + 1;
@@ -175,7 +205,7 @@ int solveRouting(routingInst *rst)
 	  edgeID = getEdgeID(rst, nextPoint, currPoint);
 	}
 
-	// get and store edge ID
+	// store edge ID
 	if (edgeID == -1) return -1;	
 	rst->nets[i].nroute.segments[j].edges[edgeCount] = edgeID;
 	
@@ -195,6 +225,7 @@ int solveRouting(routingInst *rst)
         currPoint.x = pin2.x;
         nextPoint.x = pin2.x;
 
+	// calculate edgeID
         if (pin2.y > pin1.y) {
           currPoint.y = pin1.y + k;
           nextPoint.y = pin1.y + k + 1;
@@ -228,26 +259,37 @@ int writeOutput(const char *outRouteFile, routingInst *rst)
 
 
   // write net segments to fileOut
-  for (int i=0; i< rst->numNets; ++i) // enumerates through nets
+  for (int i = 0; i < rst->numNets; ++i) // enumerates through nets
   {
-    char *string = (char *)malloc(1000 * sizeof(char));
+    /*
+    char *string = (char*) malloc(1000 * sizeof(char));
     if (!string) {
       fputs ("ERR: memory allocation for string failed", stderr);
       exit (EXIT_FAILURE);
     }
+    */
 
-    for (int j=0; j < rst->nets[i].nroute.numSegs; ++j) // enumerates through endpoints of routes
-    {
-      sprintf(string, "(%d,%d)-(%d,%d)\n",
-	      rst->nets[i].nroute.segments[j].p1.x, rst->nets[i].nroute.segments[j].p1.y,
-	      rst->nets[i].nroute.segments[j].p2.x, rst->nets[i].nroute.segments[j].p2.y
-	      );
-      fileOut << string;
+    fileOut << "n" << rst->nets[i].id << endl;
+    
+    for (int j = 0; j < rst->nets[i].nroute.numSegs; ++j) {
+      // iterates through endpoints of routes
+
+      for (int k = 0; k < rst->nets[i].nroute.segments[j].numEdges; ++k) {
+	point p1;
+	point p2;
+	
+	unpackEdgeID(rst, rst->nets[i].nroute.segments[j].edges[k], &p1, &p2);
+	
+	fileOut << "(" <<
+	   p1.x << "," <<
+	   p1.y << ")-(" <<
+	   p2.x << "," <<
+	   p2.y << ")" << endl;
+      }
     }
 
-    free(string);
+    fileOut << "!" << endl;
   }
-
   
   //close the output file
   fileOut.close();
@@ -269,48 +311,29 @@ int release(routingInst *rst){
   /*********** TO BE FILLED BY YOU **********/
   if (!rst) return 0; // failure if rst is NULL
   
-  
-  // NOTE: THESE ALL CURRENTLY SEGFAULT RIGHT NOW
-  
-  
-  // release all edges (???)
-  if (rst->nets->nroute.segments->edges) // SEGFAULT OOPS LOL
-    free(rst->nets->nroute.segments->edges);
-  else
-    cout << "No edges??" << endl;
-  
-  // release all segments
-  if (rst->nets->nroute.segments)
-    free(rst->nets->nroute.segments);
-  else
-    cout << "No segments??" << endl;
-  
-  // release all routes (???)
-  //free(rst->nets->nroute);
+  // for each net
+  for (int i=0; i<rst->numNets; ++i) {
 
-  // release all fields within net struct
-  if (rst->nets->pins)
-    free(rst->nets->pins);
-  else
-    cout << "No pins??" << endl;
+    // free all pins
+    free(rst->nets[i].pins);
 
-  // release all nets
-  if (rst->nets)
-    free(rst->nets);
-  else
-    cout << "No nets??" << endl;
+    // for each segment
+    for (int j=0; j<rst->nets[i].nroute.numSegs; ++j) {
+      // free edges
+      free(rst->nets[i].nroute.segments[j].edges);
+    }
+
+    // free segments array in route
+    free(rst->nets[i].nroute.segments);
+  }
+
+  // free nets
+  free(rst->nets);
+
+  // free edgeCaps and edgeUtils
+  // TODO
   
-  // release fields within routing instance
-  if (rst->edgeCaps)
-    free(rst->edgeCaps);
-  else
-    cout << "No edgeCaps??" << endl;
-  if (rst->edgeUtils)
-    free(rst->edgeUtils);
-  else
-    cout << "No edgeUtils??" << endl;
-  
-  // release the routing instance
+  // release the routing instance itself
   free(rst);
 
   return 1; // success!
