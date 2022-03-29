@@ -97,6 +97,7 @@ int readBenchmark(const char *fileName, routingInst *rst){
 int solveRouting(routingInst *rst)
 {
   /*********** TO BE FILLED BY YOU **********/
+  
   for(int i=0; i < rst->numNets; ++i){
     // iterate through all nets
     net myNet = rst->nets[i];
@@ -124,18 +125,18 @@ int solveRouting(routingInst *rst)
       
       // pins have horizontal gap
       for (int k = edgeCount; k < xgap; ++k) {
-	// add horizontal edge to segment
+	      // add horizontal edge to segment
 
-	// increment edgeCount
-	++edgeCount;
+	      // increment edgeCount
+	      ++edgeCount;
       }
 
       // pins have vertical gap
       for (int k = edgeCount; k < ygap + edgeCount; ++k) {
-	// add horizontal edge to segment
-
-	// increment edgeCount
-	++edgeCount;
+	      // add horizontal edge to segment
+        
+	      // increment edgeCount
+	      ++edgeCount;
       }
     }
   }
