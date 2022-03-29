@@ -120,23 +120,17 @@ int solveRouting(routingInst *rst)
       // allocate memory for minimum number of edges
       myNet.nroute.segments[j].numEdges = xgap + ygap;
       myNet.nroute.segments[j].edges = (int*) malloc(myNet.nroute.segments[j].numEdges * sizeof(int));
-
-      int edgeCount = 0;
       
       // pins have horizontal gap
-      for (int k = edgeCount; k < xgap; ++k) {
-	      // add horizontal edge to segment
-
-	      // increment edgeCount
-	      ++edgeCount;
+      for (int k = 0; k < xgap; ++k) {
+	// add horizontal edge to segment
+	
       }
-
+      
       // pins have vertical gap
-      for (int k = edgeCount; k < ygap + edgeCount; ++k) {
-	      // add horizontal edge to segment
-        
-	      // increment edgeCount
-	      ++edgeCount;
+      for (int k = 0; k < ygap; ++k) {
+	// add horizontal edge to segment
+	
       }
     }
   }
