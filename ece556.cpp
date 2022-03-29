@@ -83,6 +83,9 @@ int readBenchmark(const char *fileName, routingInst *rst){
     }
   }
 
+  // calculate and store numEdges
+  rst->numEdges = ((rst->gy) * ((rst->gx)-1)) + ((rst->gx) * ((rst->gy)-1));
+
   // BLOCKAGE READING GOES HERE (???)
   
   // clean up and return
@@ -94,14 +97,46 @@ int readBenchmark(const char *fileName, routingInst *rst){
 int solveRouting(routingInst *rst)
 {
   /*********** TO BE FILLED BY YOU **********/
-  for(int x=0; x<rst->numNets; ++x){  // enemerate through nets
-    for(int y=0; y<rst->nets[x].numPins; ++y){  // enumerate through pins in net
-      point p_1 = rst->nets[x].pins[y];
-      for(int z=1; z<(rst->nets[x].numPins-y); ++z){  // enumerate through each following pin_y
-        point p_2 = rst->nets[x].pins[y+z];
+  
+  for(int i=0; i < rst->numNets; ++i){
+    // iterate through all nets
+    net myNet = rst->nets[i];
 
-        // generate + save path between p1/p2 //
+    // there will be 1 less segment than there are pins
+    // (e.g. 3 pins will only need 2 segments to connect)
+    myNet.nroute.numSegs = myNet.numPins - 1;
 
+    // allocate memory for segments
+    myNet.nroute.segments = (segment*) malloc(myNet.nroute.numSegs * sizeof(segment));
+    
+    for(int j = 0; j < myNet.nroute.numSegs; ++j){
+      // a segment is formed from a pin and its next pin in net
+      point pin1 = myNet.pins[j];
+      point pin2 = myNet.pins[j+1];
+      
+      int xgap = pin2.x - pin1.x;
+      int ygap = pin2.y - pin1.y;
+
+      // allocate memory for minimum number of edges
+      myNet.nroute.segments[j].numEdges = xgap + ygap;
+      myNet.nroute.segments[j].edges = (int*) malloc(myNet.nroute.segments[j].numEdges * sizeof(int));
+
+      int edgeCount = 0;
+      
+      // pins have horizontal gap
+      for (int k = edgeCount; k < xgap; ++k) {
+	      // add horizontal edge to segment
+
+	      // increment edgeCount
+	      ++edgeCount;
+      }
+
+      // pins have vertical gap
+      for (int k = edgeCount; k < ygap + edgeCount; ++k) {
+	      // add horizontal edge to segment
+        
+	      // increment edgeCount
+	      ++edgeCount;
       }
     }
   }
