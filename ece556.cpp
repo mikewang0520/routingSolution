@@ -94,7 +94,17 @@ int readBenchmark(const char *fileName, routingInst *rst){
 int solveRouting(routingInst *rst)
 {
   /*********** TO BE FILLED BY YOU **********/
+  for(int x=0; x<rst->numNets; ++x){  // enemerate through nets
+    for(int y=0; y<rst->nets[x].numPins; ++y){  // enumerate through pins in net
+      point p_1 = rst->nets[x].pins[y];
+      for(int z=1; z<(rst->nets[x].numPins-y); ++z){  // enumerate through each following pin_y
+        point p_2 = rst->nets[x].pins[y+z];
 
+        // generate + save path between p1/p2 //
+
+      }
+    }
+  }
   return 1;
 }
 
