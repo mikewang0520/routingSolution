@@ -4,9 +4,36 @@
 #include <iostream>
 #include <fstream>
 #include <bits/stdc++.h>
+#include <cstdlib>
 #include "ece556.h"
 
 using namespace std;
+
+int getEdgeID(routingInst *rst, point p1, point p2) {
+  int x1 = p1.x;
+  int y1 = p1.y;
+  int x2 = p2.x;
+  int y2 = p2.y;
+  int gx = rst->gx;
+  int gy = rst->gy;
+
+  // if edge is horizontal
+  if (y1 == y2) {
+    return y2*(gx-1)+x2-1;
+  }
+  // else if edge is vertical
+  else if (x1 == x2) {
+    return gx*gy+(y2-2)*gy+x2;
+  }
+  // else not an edge
+  else {
+    cout << "NOT AN EDGE!" << endl;
+    return -1;
+  }
+
+  // default
+  return -1;
+}
 
 int readBenchmark(const char *fileName, routingInst *rst){
   /*********** TO BE FILLED BY YOU **********/
@@ -100,37 +127,91 @@ int solveRouting(routingInst *rst)
   
   for(int i=0; i < rst->numNets; ++i){
     // iterate through all nets
-    net myNet = rst->nets[i];
 
     // there will be 1 less segment than there are pins
     // (e.g. 3 pins will only need 2 segments to connect)
-    myNet.nroute.numSegs = myNet.numPins - 1;
+    rst->nets[i].nroute.numSegs = rst->nets[i].numPins - 1;
 
     // allocate memory for segments
-    myNet.nroute.segments = (segment*) malloc(myNet.nroute.numSegs * sizeof(segment));
+    rst->nets[i].nroute.segments = (segment*) malloc(rst->nets[i].nroute.numSegs * sizeof(segment));
     
-    for(int j = 0; j < myNet.nroute.numSegs; ++j){
+    for(int j = 0; j < rst->nets[i].nroute.numSegs; ++j){
       // a segment is formed from a pin and its next pin in net
-      point pin1 = myNet.pins[j];
-      point pin2 = myNet.pins[j+1];
+      point pin1 = rst->nets[i].pins[j];
+      point pin2 = rst->nets[i].pins[j+1];
       
-      int xgap = pin2.x - pin1.x;
-      int ygap = pin2.y - pin1.y;
-
+      int xgap = abs(pin2.x - pin1.x);
+      int ygap = abs(pin2.y - pin1.y);
+      
       // allocate memory for minimum number of edges
-      myNet.nroute.segments[j].numEdges = xgap + ygap;
-      myNet.nroute.segments[j].edges = (int*) malloc(myNet.nroute.segments[j].numEdges * sizeof(int));
+      rst->nets[i].nroute.segments[j].numEdges = xgap + ygap;
+      rst->nets[i].nroute.segments[j].edges = (int*) malloc(rst->nets[i].nroute.segments[j].numEdges * sizeof(int));
+
+      int edgeCount = 0;
+
+      // record start and end points of segments
+      rst->nets[i].nroute.segments[j].p1 = pin1;
+      rst->nets[i].nroute.segments[j].p2 = pin2;
       
       // pins have horizontal gap
       for (int k = 0; k < xgap; ++k) {
 	// add horizontal edge to segment
+	point currPoint;
+	point nextPoint;
+
+	currPoint.y = pin1.y;
+	nextPoint.y = pin1.y;
+
+	int edgeID = -1;
 	
+	if (pin2.x > pin1.x) {
+	  currPoint.x = pin1.x + k;
+	  nextPoint.x = pin1.x + k + 1;
+	  edgeID = getEdgeID(rst, currPoint, nextPoint);
+	}
+	else {
+	  currPoint.x = pin1.x - k;
+	  nextPoint.x = pin1.x - k - 1;
+	  edgeID = getEdgeID(rst, nextPoint, currPoint);
+	}
+
+	// get and store edge ID
+	if (edgeID == -1) return -1;	
+	rst->nets[i].nroute.segments[j].edges[edgeCount] = edgeID;
+	
+	// increment edgeCount
+	++edgeCount;
       }
       
       // pins have vertical gap
       for (int k = 0; k < ygap; ++k) {
 	// add horizontal edge to segment
+	 // add horizontal edge to segment
+        point currPoint;
+        point nextPoint;
+
+	int edgeID = -1;
 	
+        currPoint.x = pin2.x;
+        nextPoint.x = pin2.x;
+
+        if (pin2.y > pin1.y) {
+          currPoint.y = pin1.y + k;
+          nextPoint.y = pin1.y + k + 1;
+	  edgeID = getEdgeID(rst, currPoint, nextPoint);
+        }
+        else {
+          currPoint.y = pin1.y - k;
+          nextPoint.y = pin1.y - k - 1;
+	  edgeID = getEdgeID(rst, nextPoint, currPoint);
+        }
+
+        // get and store edge ID
+        if (edgeID == -1) return -1;
+        rst->nets[i].nroute.segments[j].edges[edgeCount] = edgeID;
+
+        // increment edgeCount
+        ++edgeCount;
       }
     }
   }
