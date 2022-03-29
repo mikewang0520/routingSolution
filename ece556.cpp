@@ -130,9 +130,9 @@ int readBenchmark(const char *fileName, routingInst *rst){
       // iterate over all pins within a net
       getline(myfile, line); // read line
       linestream.str(line);
-      getline(linestream, item, ' '); // token 0 (x)
+      getline(linestream, item, '\t'); // token 0 (x)
       rst->nets[i].pins[j].x = stoi(item);
-      getline(linestream, item, '\t'); // token 1 (y)
+      getline(linestream, item, '\n'); // token 1 (y)
       rst->nets[i].pins[j].y = stoi(item);
       linestream.str("");
       linestream.clear();
