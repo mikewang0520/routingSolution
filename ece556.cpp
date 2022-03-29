@@ -26,7 +26,6 @@ int readBenchmark(const char *fileName, routingInst *rst){
   getline(linestream, item, ' '); // token 0 ("grid")
   getline(linestream, item, ' '); // token 1 (gx)
   rst->gx = stoi(item);
-  // NOTE: THIS MIGHT NOT WORK BECAUSE THE DELIMITER SHOULD BE \n???
   getline(linestream, item, ' '); // token 2 (gy)
   rst->gy = stoi(item);
   linestream.str("");
@@ -109,21 +108,23 @@ int writeOutput(const char *outRouteFile, routingInst *rst)
 
 
   // write net segments to fileOut
-  for (int i=0; i< (*rst).numNets; ++i) // enumerates through nets
+  for (int i=0; i< rst->numNets; ++i) // enumerates through nets
   {
     char *string = (char *)malloc(1000 * sizeof(char));
-    if (!name) {
+    if (!string) {
       fputs ("ERR: memory allocation for string failed", stderr);
       exit (EXIT_FAILURE);
     }
-    sprintf(string, "n" , i, "\n");
-    for (int j=0; j < (*rst).nets[i].nroute.numSegs; ++j) // enumerates through endpoints of routes
+
+    for (int j=0; j < rst->nets[i].nroute.numSegs; ++j) // enumerates through endpoints of routes
     {
-      sprintf(string, "(", rst->nets[i].nroute.segments[j].p1.x, ",", rst->nets[i].nroute.segments[j].p1.y, ")-");
-      sprintf(string, "(", rst->nets[i].nroute.segments[j].p2.x, ",", rst->nets[i].nroute.segments[j].p2.y, ")\n");
+      sprintf(string, "(%d,%d)-(%d,%d)\n",
+	      rst->nets[i].nroute.segments[j].p1.x, rst->nets[i].nroute.segments[j].p1.y,
+	      rst->nets[i].nroute.segments[j].p2.x, rst->nets[i].nroute.segments[j].p2.y
+	      );
+      fileOut << string;
     }
-    sprintf(string,"!\n");
-    fileOut << string;
+
     free(string);
   }
 
@@ -132,6 +133,15 @@ int writeOutput(const char *outRouteFile, routingInst *rst)
   fileOut.close();
   return 1;
 }
+
+
+/** 
+ * Need to recursively delete all memory allocations from 
+ * bottom to top (e.g., starting from segments, then routes
+ * then individual fields within a net struct, then the
+ * nets, then the fields in a routing instance, and finally
+ * the routing instance) 
+ */
 
 // Release memory used
 // NOTE: do these need to be in for loops?
