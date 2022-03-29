@@ -8,31 +8,8 @@
 
 using namespace std;
 
-// Reference for routingInst struct
-//  typedef struct
-  //  {
-    //   int gx ;             /* x dimension of the global routing grid */
-    //   int gy ;             /* y dimension of the global routing grid */
-
-    //   int cap ;
-
-    //   int numNets ;        /* number of nets */
-    //   net *nets ;          /* array of nets */
-
-    //   int numEdges ;       /* number of edges of the grid */
-    //   int *edgeCaps;       /* array of the actual edge capacities after considering for blockages */
-    //   int *edgeUtils;      /* array of edge utilizations */
-
-    //  } routingInst ;
-
 int readBenchmark(const char *fileName, routingInst *rst){
   /*********** TO BE FILLED BY YOU **********/
-  /*
-  std::ofstream myfile;
-  myfile.open(fileName);
-  myfile << "readBenchmark file\n";
-  myfile.close();
-  */
 
   // open read file
   ifstream myfile;
@@ -107,41 +84,8 @@ int readBenchmark(const char *fileName, routingInst *rst){
     }
   }
 
-  // BLOCKAGES????
+  // BLOCKAGES???
   
-
-  // read all pins of all nets (nested for loop)
-  for (int i = 0; i < rst->numNets; ++i) {
-    // iterate over all nets
-    getline(myfile, line); // read line
-    linestream.str(line);
-    getline(linestream, item, ' '); // token 0 (netName (e.g. "n0"))
-    int netid = stoi(item.substr(1)); // extracts number from "n0"
-    rst->nets[i].id = netid;
-    getline(linestream, item, ' '); // token 1 (numPins)
-    int numPins = stoi(item);
-    rst->nets[i].numPins = numPins;
-    linestream.str("");
-    linestream.clear();
-
-    // allocated per-net space for pins
-    rst->nets[i].pins = (point*) malloc(rst->nets[i].numPins * sizeof(point));
-
-    for (int j = 0; j < rst->nets[i].numPins; ++j) {
-      // iterate over all pins within a net
-      getline(myfile, line); // read line
-      linestream.str(line);
-      getline(linestream, item, ' '); // token 0 (x)
-      rst->nets[i].pins[j].x = stoi(item);
-      getline(linestream, item, '\t'); // token 1 (y)
-      rst->nets[i].pins[j].y = stoi(item);
-      linestream.str("");
-      linestream.clear();
-    }
-  }
-
-  // BLOCKAGES????
-
   // clean up and return
   //myfile.close();
   return 1;
@@ -155,25 +99,6 @@ int solveRouting(routingInst *rst)
   return 1;
 }
 
-int writeOutput(const char *outRouteFile, routingInst *rst){
-  /*********** TO BE FILLED BY YOU **********/
-  ofstream myfile;
-  myfile.open(outRouteFile);
-  myfile << "writeOutput file\n";
-  myfile.close();
-  
-  return 1;
-}
-
-
-/**
- * Need to recursively delete all memory allocations from
- * bottom to top (e.g., starting from segments then routes
- * then individual fields within a net struct, then the
- * nets, then the fields in a routing instance, and finally
- * the routing instance)
- */
-
 // Write the routing solution
 int writeOutput(const char *outRouteFile, routingInst *rst)
 {
@@ -183,7 +108,7 @@ int writeOutput(const char *outRouteFile, routingInst *rst)
   fileOut.open(outRouteFile);
 
 
- // write net segments to fileOut
+  // write net segments to fileOut
   for (int i=0; i< (*rst).numNets; ++i) // enumerates through nets
   {
     char *string = (char *)malloc(1000 * sizeof(char));
@@ -194,8 +119,8 @@ int writeOutput(const char *outRouteFile, routingInst *rst)
     sprintf(string, "n" , i, "\n");
     for (int j=0; j < (*rst).nets[i].nroute.numSegs; ++j) // enumerates through endpoints of routes
     {
-      sprintf(string, "(", (*rst).nets[i].nroute.segments[j].p1.x, ",", (*rst).nets[i].nroute.segments[j].p1.y, ")-");
-      sprintf(string, "(", (*rst).nets[i].nroute.segments[j].p2.x, ",", (*rst).nets[i].nroute.segments[j].p2.y, ")\n");
+      sprintf(string, "(", rst->nets[i].nroute.segments[j].p1.x, ",", rst->nets[i].nroute.segments[j].p1.y, ")-");
+      sprintf(string, "(", rst->nets[i].nroute.segments[j].p2.x, ",", rst->nets[i].nroute.segments[j].p2.y, ")\n");
     }
     sprintf(string,"!\n");
     fileOut << string;
@@ -213,8 +138,8 @@ int writeOutput(const char *outRouteFile, routingInst *rst)
 int release(routingInst *rst){
   /*********** TO BE FILLED BY YOU **********/
   if (!rst) return 0; // failure if rst is NULL
-
-
+  
+  
   // NOTE: THESE ALL CURRENTLY SEGFAULT RIGHT NOW
   
   
@@ -223,7 +148,7 @@ int release(routingInst *rst){
     free(rst->nets->nroute.segments->edges);
   else
     cout << "No edges??" << endl;
-
+  
   // release all segments
   if (rst->nets->nroute.segments)
     free(rst->nets->nroute.segments);
@@ -255,52 +180,6 @@ int release(routingInst *rst){
   else
     cout << "No edgeUtils??" << endl;
   
-  // release the routing instance
-  free(rst);
-
-  return 1; // success!
-}
-
-  // NOTE: THESE ALL CURRENTLY SEGFAULT RIGHT NOW
-
-
-  // release all edges (???)
-  if (rst->nets->nroute.segments->edges) // SEGFAULT OOPS LOL
-    free(rst->nets->nroute.segments->edges);
-  else
-    cout << "No edges??" << endl;
-
-  // release all segments
-  if (rst->nets->nroute.segments)
-    free(rst->nets->nroute.segments);
-  else
-    cout << "No segments??" << endl;
-
-  // release all routes (???)
-  //free(rst->nets->nroute);
-
-  // release all fields within net struct
-  if (rst->nets->pins)
-    free(rst->nets->pins);
-  else
-    cout << "No pins??" << endl;
-
-  // release all nets
-  if (rst->nets)
-    free(rst->nets);
-  else
-    cout << "No nets??" << endl;
-
-  // release fields within routing instance
-  if (rst->edgeCaps)
-    free(rst->edgeCaps);
-  else
-    cout << "No edgeCaps??" << endl;
-  if (rst->edgeUtils)
-    free(rst->edgeUtils);
-  else
-    cout << "No edgeUtils??" << endl;
-
   // release the routing instance
   free(rst);
 
