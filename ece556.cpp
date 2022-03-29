@@ -90,7 +90,7 @@ int readBenchmark(const char *fileName, routingInst *rst){
   // read capacity number
   getline(myfile, line); // read line
   linestream.str(line);
-  getline(linestream, item, ' '); // token 0 ("capacity")
+  getline(linestream, item, '\t'); // token 0 ("capacity")
   getline(linestream, item, ' '); // token 1 (cap)
   rst->cap = stoi(item);
   linestream.str("");
