@@ -83,7 +83,7 @@ int readBenchmark(const char *fileName, routingInst *rst){
     }
   }
 
-  // BLOCKAGES???
+  // BLOCKAGE READING GOES HERE (???)
   
   // clean up and return
   //myfile.close();
